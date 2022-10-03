@@ -1,0 +1,19 @@
+fos_rest:
+  serializer:
+    serialize_null: true
+  view:
+    view_response_listener:  true
+
+  exception:
+    messages:
+      Symfony\Component\HttpKernel\Exception\HttpException: true
+  #    exception_controller: 'fos_rest.exception.controller:showAction'
+
+  format_listener:
+    rules:
+      - { path: ^/, prefer_extension: true, fallback_format: json, priorities: [ json ] }
+      - { path: '^/', stop: true } # Available for version >= 1.5
+
+  body_converter:
+    enabled: true
+    validate: true
