@@ -19,6 +19,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Validator\Constraints\Json;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
 
 /**
@@ -26,6 +27,14 @@ use Symfony\Component\Validator\ConstraintViolationListInterface;
  */
 class OrderController extends AbstractFOSRestController
 {
+
+    private OrderService $orderService;
+
+    public function __construct(OrderService $orderService)
+    {
+        $this->orderService = $orderService;
+    }
+
     /** Get All Orders
      * @Route("/orders", name="app.orders", methods={"GET"})
      * @OA\Response(
@@ -67,7 +76,7 @@ class OrderController extends AbstractFOSRestController
      * )
      * @throws \Exception
      */
-    public function store(OrderService $orderService, ConstraintViolationListInterface $validationErrors, NewRequestType $newRequestType)
+    public function store(ConstraintViolationListInterface $validationErrors, NewRequestType $newRequestType) : JsonResponse|View
     {
         //request i validate et
         if (\count($validationErrors) > 0) {
@@ -75,7 +84,7 @@ class OrderController extends AbstractFOSRestController
         }
         // siparişi kaydet
         try {
-            $orderId = $orderService->store($newRequestType);
+            $orderId = $this->orderService->store($newRequestType);
         } catch (Exception $e) {
             throw new \Exception('Sipariş Kaydedilemedi');
         }
@@ -84,19 +93,12 @@ class OrderController extends AbstractFOSRestController
     }
 
     /** Delete An Order
-     * @Route("/orders/{id}", name="app.order.delete", methods={"DELETE"})
+     * @Route("/orders/{order}", name="app.order.delete", methods={"DELETE"})
      */
-    public function delete(ManagerRegistry $doctrine, Order $order): Response
+    public function delete(Order $order) : JsonResponse
     {
-        $entityManager = $doctrine->getManager();
+        $this->orderService->delete($order);
 
-//        if (!$order) {
-//            return $this->json('No project found for id' . $order->getId(), 404);
-//        }
-
-        $entityManager->remove($order);
-        $entityManager->flush();
-
-        return $this->json(['success' => true, 'message' => 'Deleted order successfully with id ' . $order->getId()]);
+        return $this->json(['status' => true, 'message' => 'Deleted order successfully with id ' . $order->getId()]);
     }
 }

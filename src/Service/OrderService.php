@@ -34,4 +34,11 @@ class OrderService extends OrderRepository
                 return $this->_em->getConnection()->lastInsertId();
     }
 
+    public function delete(Order $order) : bool
+    {
+        $this->delete($order);
+
+        return true;
+    }
+
 }
