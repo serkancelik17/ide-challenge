@@ -26,8 +26,6 @@ class OrderItem
     private float $total;
 
     #[ORM\ManyToOne(inversedBy: 'items')]
-    #[ORM\JoinColumn(nullable: false)]
-    #[ORM\Column(name: "`order`", type: "integer")]
     private Order $order;
 
     public function getId(): int

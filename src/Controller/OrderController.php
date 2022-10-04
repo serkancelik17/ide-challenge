@@ -2,25 +2,29 @@
 
 namespace App\Controller;
 
-use App\Entity\Customer;
-use App\Entity\OrderItem;
-use App\Type\Order\NewRequestType;
-use FOS\RestBundle\Controller\Annotations as Rest;
-use OpenApi\Annotations as OA;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Response;
-use Doctrine\Persistence\ManagerRegistry;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\Request;
 use App\Entity\Order;
-use Nelmio\ApiDocBundle\Annotation\Model;
+use App\Repository\OrderRepository;
+use App\Service\OrderService;
 use App\Type\Order\IndexResponseType;
+use App\Type\Order\NewRequestType;
+use Doctrine\DBAL\Exception;
+use Doctrine\Persistence\ManagerRegistry;
+use FOS\RestBundle\Controller\AbstractFOSRestController;
+use FOS\RestBundle\Controller\Annotations as Rest;
+use FOS\RestBundle\View\View;
+use Nelmio\ApiDocBundle\Annotation\Model;
+use OpenApi\Annotations as OA;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Validator\ConstraintViolationListInterface;
 
 /**
  * @Route("/api", name="app.api")
  */
-
-class OrderController extends AbstractController
+class OrderController extends AbstractFOSRestController
 {
     /** Get All Orders
      * @Route("/orders", name="app.orders", methods={"GET"})
@@ -31,22 +35,22 @@ class OrderController extends AbstractController
      * )
      * @Rest\View(serializerGroups={"read"}, serializerEnableMaxDepthChecks=true)
      */
-    public function index(ManagerRegistry $doctrine): Response
+    public function index(ManagerRegistry $doctrine, SerializerInterface $serializer): JsonResponse
     {
         $data = [];
+
+        /** @var Order[] $orders */
         $orders = $doctrine->getRepository(Order::class)->findAll();
 
         foreach ($orders as $order) {
             $data[] = [
                 'id' => $order->getId(),
                 'customerId' => $order->getCustomer()->getId(),
-                'items' => $order->getItems(),
+                'items' => $order->getItems()->toArray(),
                 'total' => $order->getTotal(),
             ];
         }
-
-
-        return $this->json($data);
+        return new JsonResponse($data);
     }
 
 
@@ -56,24 +60,27 @@ class OrderController extends AbstractController
      * @OA\RequestBody(
      *     @OA\JsonContent(ref=@Model(type=NewRequestType::class))
      * )
+     * @ParamConverter("newRequestType", class="App\Type\Order\NewRequestType", converter="fos_rest.request_body")
      * @OA\Response(
      *     response=200,
-     *     description="Returns Pool List",
+     *     description="Add New Order",
      * )
+     * @throws \Exception
      */
-    public function store(ManagerRegistry $doctrine, Request $request): Response
+    public function store(OrderService $orderService, ConstraintViolationListInterface $validationErrors, NewRequestType $newRequestType)
     {
-        $entityManager = $doctrine->getManager();
+        //request i validate et
+        if (\count($validationErrors) > 0) {
+            return View::create($validationErrors, Response::HTTP_BAD_REQUEST);
+        }
+        // siparişi kaydet
+        try {
+            $orderId = $orderService->store($newRequestType);
+        } catch (Exception $e) {
+            throw new \Exception('Sipariş Kaydedilemedi');
+        }
 
-        $order = new Order();
-        $order->setCustomer(new Customer());
-        $order->addItem(new OrderItem());
-        $order->setTotal($request->request->get('total'));
-
-        $entityManager->persist($order);
-        $entityManager->flush();
-
-        return $this->json(['status' => true,'message' => 'Created new order successfully with id ' . $order->getId()]);
+        return $this->json(['status' => true, 'message' => 'Created new order successfully with id ' . $orderId]);
     }
 
     /** Delete An Order
@@ -90,6 +97,6 @@ class OrderController extends AbstractController
         $entityManager->remove($order);
         $entityManager->flush();
 
-        return $this->json( ['success'=> true,'message'=>'Deleted order successfully with id ' . $order->getId()]);
+        return $this->json(['success' => true, 'message' => 'Deleted order successfully with id ' . $order->getId()]);
     }
 }
