@@ -1,6 +1,7 @@
 <?php
 namespace  App\Type\Order;
 
+use App\Type\Order\Schema\ItemType;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 

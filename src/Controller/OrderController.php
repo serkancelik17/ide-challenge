@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Entity\Order;
-use App\Repository\OrderRepository;
 use App\Service\OrderService;
 use App\Type\Order\IndexResponseType;
 use App\Type\Order\NewRequestType;
@@ -19,11 +18,10 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Validator\Constraints\Json;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
 
 /**
- * @Route("/api", name="app.api")
+ * @Route("/api/orders")
  */
 class OrderController extends AbstractFOSRestController
 {
@@ -36,7 +34,7 @@ class OrderController extends AbstractFOSRestController
     }
 
     /** Get All Orders
-     * @Route("/orders", name="app.orders", methods={"GET"})
+     * @Route("", methods={"GET"})
      * @OA\Response(
      *     response=200,
      *     description="Return Order List",
@@ -65,7 +63,7 @@ class OrderController extends AbstractFOSRestController
 
     /**
      *  Add New Order
-     * @Route("/orders", name="app.orders.store", methods={"POST"})
+     * @Route("", methods={"POST"})
      * @OA\RequestBody(
      *     @OA\JsonContent(ref=@Model(type=NewRequestType::class))
      * )
@@ -86,19 +84,38 @@ class OrderController extends AbstractFOSRestController
         try {
             $orderId = $this->orderService->store($newRequestType);
         } catch (Exception $e) {
-            throw new \Exception('Sipariş Kaydedilemedi');
+            throw new \Exception('Order not saved! Error message:'.$e->getMessage());
         }
 
         return $this->json(['status' => true, 'message' => 'Created new order successfully with id ' . $orderId]);
     }
 
     /** Delete An Order
-     * @Route("/orders/{order}", name="app.order.delete", methods={"DELETE"})
+     * @Route("/{order}", methods={"DELETE"})
      */
     public function delete(Order $order) : JsonResponse
     {
         $this->orderService->delete($order);
 
         return $this->json(['status' => true, 'message' => 'Deleted order successfully with id ' . $order->getId()]);
+    }
+
+    /** Get All Orders
+     * @Route("/{order}/discounts", methods={"GET"})
+     * @OA\Response(
+     *     response=200,
+     *     description="Return Order Discounts",
+     *     @Model(type=App\Type\Order\OrderDiscountResponseType::class))
+     * )
+     * @Rest\View()
+     */
+    public function discounts(Order $order)
+    {
+        dd($order);
+
+        $data = [];
+
+        return new JsonResponse();
+
     }
 }

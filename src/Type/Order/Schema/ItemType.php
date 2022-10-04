@@ -1,5 +1,5 @@
 <?php
-namespace  App\Type\Order;
+namespace  App\Type\Order\Schema;
 
 use Symfony\Component\Validator\Constraints as Assert;
 
