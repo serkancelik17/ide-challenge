@@ -3,9 +3,15 @@
 namespace App\Controller;
 
 use App\Entity\Order;
+use App\Rule\DiscountCategoryBuy5Get1Rule;
+use App\Rule\DiscountCategoryToCheapest20PercentGte2Rule;
+use App\Rule\DiscountPayment10PercentOver1000Rule;
+use App\Rule\DiscountRule;
 use App\Service\OrderService;
 use App\Type\Order\IndexResponseType;
 use App\Type\Order\NewRequestType;
+use App\Type\Order\OrderDiscountResponseType;
+use App\Type\Order\Schema\DiscountType;
 use Doctrine\DBAL\Exception;
 use Doctrine\Persistence\ManagerRegistry;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
@@ -40,7 +46,6 @@ class OrderController extends AbstractFOSRestController
      *     description="Return Order List",
      *     @Model(type=IndexResponseType::class))
      * )
-     * @Rest\View(serializerGroups={"read"}, serializerEnableMaxDepthChecks=true)
      */
     public function index(ManagerRegistry $doctrine, SerializerInterface $serializer): JsonResponse
     {
@@ -105,17 +110,34 @@ class OrderController extends AbstractFOSRestController
      * @OA\Response(
      *     response=200,
      *     description="Return Order Discounts",
-     *     @Model(type=App\Type\Order\OrderDiscountResponseType::class))
+     *     @Model(type="string"))
      * )
      * @Rest\View()
      */
-    public function discounts(Order $order)
+    public function discounts(Order $order) : View
     {
-        dd($order);
-
         $data = [];
 
-        return new JsonResponse();
+        $rules = [
+            DiscountCategoryBuy5Get1Rule::class,
+         //   DiscountCategoryToCheapest20PercentGte2Rule::class,
+         //   DiscountPayment10PercentOver1000Rule::class
+        ];
+
+
+        $data = new OrderDiscountResponseType();
+        $data->setOrderId($order->getId());
+
+        $discounts = [];
+        foreach ($rules AS $rule) {
+            $instance = (new $rule($order))->handle($order);
+
+            if($instance instanceof DiscountRule)
+                $discounts[] = $instance;
+        }
+        $data->setDiscounts($discounts);
+
+        return View::create($data);
 
     }
 }

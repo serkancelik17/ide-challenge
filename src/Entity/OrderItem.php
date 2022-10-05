@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\OrderItemRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\Column;
 
 #[ORM\Entity(repositoryClass: OrderItemRepository::class)]
 class OrderItem
@@ -12,9 +13,6 @@ class OrderItem
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private int $id;
-
-    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
-    private Product $product;
 
     #[ORM\Column]
     private int $quantity;
@@ -28,21 +26,12 @@ class OrderItem
     #[ORM\ManyToOne(inversedBy: 'items')]
     private Order $order;
 
+    #[ORM\ManyToOne(inversedBy: 'orderItems')]
+    private Product $product;
+
     public function getId(): int
     {
         return $this->id;
-    }
-
-    public function getProduct(): Product
-    {
-        return $this->product;
-    }
-
-    public function setProduct(Product $product): self
-    {
-        $this->product = $product;
-
-        return $this;
     }
 
     public function getQuantity(): int
@@ -81,14 +70,26 @@ class OrderItem
         return $this;
     }
 
-    public function getOrder(): ?Order
+    public function getOrder(): Order
     {
         return $this->order;
     }
 
-    public function setOrder(?Order $order): self
+    public function setOrder(Order $order): self
     {
         $this->order = $order;
+
+        return $this;
+    }
+
+    public function getProduct(): Product
+    {
+        return $this->product;
+    }
+
+    public function setProduct(Product $product): self
+    {
+        $this->product = $product;
 
         return $this;
     }
