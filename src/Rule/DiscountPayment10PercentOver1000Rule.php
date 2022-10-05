@@ -4,6 +4,9 @@ namespace App\Rule;
 
 use App\Entity\Order;
 
+/**
+ *  Toplam 1000TL ve üzerinde alışveriş yapan bir müşteri, siparişin tamamından %10 indirim kazanır.
+ */
 class DiscountPayment10PercentOver1000Rule extends DiscountRuleAbstract implements DiscountRule
 {
     CONST TOTAL_AMOUNT = 1000;

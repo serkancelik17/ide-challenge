@@ -6,8 +6,8 @@ use App\Entity\Order;
 
 class DiscountRuleAbstract
 {
-    private string $discountReason;
-    private float $discountAmount;
+    private ?string $discountReason = null;
+    private ?float $discountAmount = null;
     private ?float $subTotal = null;
 
     /**
@@ -29,15 +29,15 @@ class DiscountRuleAbstract
     /**
      * @return float
      */
-    public function getDiscountAmount(): float
+    public function getDiscountAmount(): ?float
     {
         return $this->discountAmount;
     }
 
     /**
-     * @param float $discountAmount
+     * @param float|null $discountAmount
      */
-    public function setDiscountAmount(float $discountAmount): void
+    public function setDiscountAmount(?float $discountAmount): void
     {
         $this->discountAmount = $discountAmount;
     }

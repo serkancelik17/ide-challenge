@@ -117,23 +117,27 @@ class OrderController extends AbstractFOSRestController
     public function discounts(Order $order) : View
     {
         $data = [];
+        $subTotal = 0;
 
         $rules = [
             DiscountCategoryBuy5Get1Rule::class,
-         //   DiscountCategoryToCheapest20PercentGte2Rule::class,
-         //   DiscountPayment10PercentOver1000Rule::class
+            DiscountCategoryToCheapest20PercentGte2Rule::class,
+            DiscountPayment10PercentOver1000Rule::class
         ];
 
 
         $data = new OrderDiscountResponseType();
         $data->setOrderId($order->getId());
-
+        $subTotal = $order->getTotal();
         $discounts = [];
+        /** @var DiscountRule $rule */
         foreach ($rules AS $rule) {
             $instance = (new $rule($order))->handle($order);
-
-            if($instance instanceof DiscountRule)
+            if($instance instanceof DiscountRule) {
+                $subTotal = $subTotal - $instance->getDiscountAmount();
+                $instance->setSubTotal($subTotal);
                 $discounts[] = $instance;
+            }
         }
         $data->setDiscounts($discounts);
 
