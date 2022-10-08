@@ -4,7 +4,7 @@ namespace  App\Type\Order;
 use App\Type\Order\Schema\DiscountType;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 
-class OrderDiscountResponseType extends AbstractFOSRestController
+class OrderDiscountResponseType
 {
     private int $orderId;
     /** @var DiscountType[] */

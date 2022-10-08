@@ -3,15 +3,14 @@
 namespace App\Controller;
 
 use App\Entity\Order;
-use App\Rule\DiscountCategoryBuy5Get1Rule;
-use App\Rule\DiscountCategoryToCheapest20PercentGte2Rule;
-use App\Rule\DiscountPayment10PercentOver1000Rule;
-use App\Rule\DiscountRule;
+use App\Rule\DiscountCategoryBuy5Get1RuleInterface;
+use App\Rule\DiscountCategoryToCheapest20PercentGte2RuleInterface;
+use App\Rule\DiscountPayment10PercentOver1000RuleInterface;
+use App\Rule\DiscountRuleAbstract;
+use App\Rule\DiscountRuleInterface;
 use App\Service\OrderService;
 use App\Type\Order\IndexResponseType;
 use App\Type\Order\NewRequestType;
-use App\Type\Order\OrderDiscountResponseType;
-use App\Type\Order\Schema\DiscountType;
 use Doctrine\DBAL\Exception;
 use Doctrine\Persistence\ManagerRegistry;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
@@ -23,7 +22,10 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
 
 /**
@@ -31,12 +33,13 @@ use Symfony\Component\Validator\ConstraintViolationListInterface;
  */
 class OrderController extends AbstractFOSRestController
 {
-
     private OrderService $orderService;
+    private ManagerRegistry $doctrine;
 
-    public function __construct(OrderService $orderService)
+    public function __construct(OrderService $orderService,ManagerRegistry $doctrine)
     {
         $this->orderService = $orderService;
+        $this->doctrine = $doctrine;
     }
 
     /** Get All Orders
@@ -47,18 +50,20 @@ class OrderController extends AbstractFOSRestController
      *     @Model(type=IndexResponseType::class))
      * )
      */
-    public function index(ManagerRegistry $doctrine, SerializerInterface $serializer): JsonResponse
+    public function index() : JsonResponse
     {
         $data = [];
 
         /** @var Order[] $orders */
-        $orders = $doctrine->getRepository(Order::class)->findAll();
-
+        $orders = $this->doctrine->getRepository(Order::class)->findAll();
         foreach ($orders as $order) {
+            $orderItems = [];
+            foreach($order->getItems() AS $item)
+                $orderItems[] = ["productId"=>$item->getProduct()->getId(),"quantity"=>$item->getQuantity(),"unitPrice"=>$item->getUnitPrice(),"total"=>$item->getTotal()];
             $data[] = [
                 'id' => $order->getId(),
                 'customerId' => $order->getCustomer()->getId(),
-                'items' => $order->getItems()->toArray(),
+                'items' => $orderItems,
                 'total' => $order->getTotal(),
             ];
         }
@@ -114,34 +119,34 @@ class OrderController extends AbstractFOSRestController
      * )
      * @Rest\View()
      */
-    public function discounts(Order $order) : View
+    public function discounts(Order $order) : JsonResponse
     {
         $data = [];
-        $subTotal = 0;
+        $totalDiscount = 0;
 
         $rules = [
-            DiscountCategoryBuy5Get1Rule::class,
-            DiscountCategoryToCheapest20PercentGte2Rule::class,
-            DiscountPayment10PercentOver1000Rule::class
+            DiscountCategoryBuy5Get1RuleInterface::class,
+            DiscountCategoryToCheapest20PercentGte2RuleInterface::class,
+            DiscountPayment10PercentOver1000RuleInterface::class
         ];
 
-
-        $data = new OrderDiscountResponseType();
-        $data->setOrderId($order->getId());
+        $data['orderId'] = $order->getId();
         $subTotal = $order->getTotal();
-        $discounts = [];
-        /** @var DiscountRule $rule */
+        //Kuralları uygulaa
         foreach ($rules AS $rule) {
             $instance = (new $rule($order))->handle($order);
-            if($instance instanceof DiscountRule) {
-                $subTotal = $subTotal - $instance->getDiscountAmount();
+            if($instance instanceof DiscountRuleInterface) {
+                $subTotal -= $instance->getDiscountAmount();
+                $totalDiscount += $instance->getDiscountAmount();
+                /** @var DiscountRuleAbstract $instance */
                 $instance->setSubTotal($subTotal);
-                $discounts[] = $instance;
+                $data['discounts'][] = ['discountReason' =>$instance->getDiscountReason(),'discountAmount'=>$instance->getDiscountAmount(),'subTotal'=>$instance->getSubTotal()];
             }
+            $data['totalDiscount'] = $totalDiscount;
+            $data['discountedTotal'] = $order->getTotal() - $totalDiscount;
         }
-        $data->setDiscounts($discounts);
 
-        return View::create($data);
+        return new JsonResponse($data);
 
     }
 }

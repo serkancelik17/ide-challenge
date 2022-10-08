@@ -4,7 +4,7 @@ namespace App\Rule;
 
 use App\Entity\Order;
 
-interface DiscountRule
+interface DiscountRuleInterface
 {
     const CATEGORY_ID = null;
     const QTY = null;

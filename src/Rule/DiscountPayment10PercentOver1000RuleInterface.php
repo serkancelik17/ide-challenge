@@ -7,14 +7,14 @@ use App\Entity\Order;
 /**
  *  Toplam 1000TL ve üzerinde alışveriş yapan bir müşteri, siparişin tamamından %10 indirim kazanır.
  */
-class DiscountPayment10PercentOver1000Rule extends DiscountRuleAbstract implements DiscountRule
+class DiscountPayment10PercentOver1000RuleInterface extends DiscountRuleAbstract implements DiscountRuleInterface
 {
     CONST TOTAL_AMOUNT = 1000;
-    CONST DISCOUNT_PERCENT = 10;
+    CONST DISCOUNT = 0.1;
 
     public function __construct()
     {
-        $this->setDiscountReason(self::DISCOUNT_PERCENT."_PERCENT_OVER_".self::TOTAL_AMOUNT);
+        $this->setDiscountReason((self::DISCOUNT * 100)."_PERCENT_OVER_".self::TOTAL_AMOUNT);
     }
 
 
@@ -22,7 +22,7 @@ class DiscountPayment10PercentOver1000Rule extends DiscountRuleAbstract implemen
     {
         //Eger sipariş 1000 TL ustu ise %10 indirim uygula
         if($order->getTotal() >= self::TOTAL_AMOUNT) {
-            $this->setDiscountAmount($order->getTotal() * (self::DISCOUNT_PERCENT/100));
+            $this->setDiscountAmount($order->getTotal() * self::DISCOUNT);
             return $this;
         }
         return false;
