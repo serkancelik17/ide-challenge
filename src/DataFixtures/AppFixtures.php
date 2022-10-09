@@ -26,8 +26,6 @@ class AppFixtures extends Fixture
         $this->manager = $manager;
         $this->faker = Factory::create();
 
-
-
         $this->loadCustomers(); //add random customers
         $this->loadProducts(); //add random products
         $this->loadOrders(); //add random orders
@@ -50,6 +48,7 @@ class AppFixtures extends Fixture
             $this->products[] = $product;
         }
         $this->manager->flush();
+
     }
 
     public function loadCustomers() {
