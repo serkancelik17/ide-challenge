@@ -2,13 +2,16 @@
 namespace App\Tests\Controller;
 
 use App\Controller\OrderController;
+use App\Entity\Order;
 use App\Service\OrderService;
 use App\Type\Order\NewRequestType;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
 
 class OrderControllerTest extends TestCase {
-    private $mockOrderService;
+    private MockObject|OrderService $mockOrderService;
+    private OrderService $orderService;
     private OrderController $orderController;
 
     protected function setUp(): void
@@ -32,31 +35,46 @@ class OrderControllerTest extends TestCase {
     /**
      * @throws \Exception
      */
-    public function storeIsWorkingProperly()
+    public function testStoreIsSuccess()
     {
         $mockValidationErrors = $this->createMock(ConstraintViolationListInterface::class);
-        $mockNewRequestType = $this->createMock(NewRequestType::class);
+        $newRequestType = new NewRequestType();
+        $newRequestType->customerId = 1;
+        $newRequestType->total = 100;
+
         //public function store(ConstraintViolationListInterface $validationErrors, NewRequestType $newRequestType) : JsonResponse|View
 
-        $response = $this->orderController->store($mockValidationErrors,$mockNewRequestType);
+        $response = $this->orderController->store($mockValidationErrors,$newRequestType);
 
-
+        self::assertEquals(200, $response->getStatusCode());
+        self::assertIsString($response->getContent());
     }
-//        $request = $this->getMock("Symfony\Component\HttpFoundation\Request");
-//        $container = $this->getMock("Symfony\Component\DependencyInjection\ContainerInterface");
-//        $service = $this->getMockBuilder("Some\Stuff")->disableOriginalConstructor()->getMock();
-//        $container->expects($this->once())
-//            ->method("getParameter")
-//            ->with($this->equalTo('do_stuff'))
-//            ->will($this->returnValue(true));
-//
-//        $container->expects($this->once())
-//            ->method("get")
-//            ->with($this->equalTo('stuff.service'))
-//            ->will($this->returnValue($service));
-//
-//        $controller = new SameStuffController();
-//        $controller->setContainer($container);
-//
-//        $controller->goAction($request);
+
+    /**
+     * @throws \Exception
+     */
+    public function testStoreIsHaveValidationError()
+    {
+        $mockValidationErrors = $this->createMock(ConstraintViolationListInterface::class);
+        $newRequestType = new NewRequestType();
+
+        $response = $this->orderController->store($mockValidationErrors,$newRequestType);
+
+        self::assertEquals(200, $response->getStatusCode());
+        self::assertIsString($response->getContent());
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testDeleteIsSuccess()
+    {
+        $mockOrder = $this->createMock(Order::class);
+
+        //    public function delete(Order $order) : JsonResponse
+        $response = $this->orderController->delete($mockOrder);
+
+        self::assertEquals(200, $response->getStatusCode());
+        self::assertIsString($response->getContent());
+    }
 }

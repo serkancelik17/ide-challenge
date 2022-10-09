@@ -88,7 +88,7 @@ class OrderController extends AbstractFOSRestController
             throw new \Exception('Order not saved! Error message:'.$e->getMessage());
         }
 
-        return $this->json(['status' => true, 'message' => 'Created new order successfully with id ' . $orderId]);
+        return new JsonResponse(['status' => true, 'message' => 'Created new order successfully with id ' . $orderId]);
     }
 
     /** Delete An Order
@@ -98,7 +98,7 @@ class OrderController extends AbstractFOSRestController
     {
         $this->orderService->delete($order);
 
-        return $this->json(['status' => true, 'message' => 'Deleted order successfully with id ' . $order->getId()]);
+        return new JsonResponse(['status' => true, 'message' => 'Deleted order successfully with id ' . $order->getId()]);
     }
 
     /** Get All Orders
