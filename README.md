@@ -131,3 +131,7 @@ php bin/console doctrine:fixtures:load --env=test
 ```bash
 vendor/bin/phpunit
 ```
+![alt text](https://cdn.shopify.com/s/files/1/0057/5668/2355/files/Postman-logo-orange-2021_1155x.png?v=1637252529)
+### Postman Collection
+If you want import Postman Collection into your workspace use this link: https://www.postman.com/collections/0f5ce176b6554b4488e9
+
