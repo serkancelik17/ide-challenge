@@ -19,7 +19,7 @@ class Product
     private string $name;
 
     #[ORM\Column]
-    private int $category;
+    private int $categoryId;
 
     #[ORM\Column]
     private float $price;
@@ -52,14 +52,14 @@ class Product
         return $this;
     }
 
-    public function getCategory(): int
+    public function getCategoryId(): int
     {
-        return $this->category;
+        return $this->categoryId;
     }
 
-    public function setCategory(int $category): self
+    public function setCategoryId(int $categoryId): self
     {
-        $this->category = $category;
+        $this->categoryId = $categoryId;
 
         return $this;
     }

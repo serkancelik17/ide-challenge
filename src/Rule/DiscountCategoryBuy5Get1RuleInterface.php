@@ -26,7 +26,7 @@ class DiscountCategoryBuy5Get1RuleInterface extends DiscountRuleAbstract impleme
         foreach ($order->getItems() as $orderItem) {
 
             //Kategori ve Qty uyusuyorsa indirimi dondur.
-            if ($orderItem->getProduct()->getCategory() == self::CATEGORY_ID && $orderItem->getQuantity() == self::QTY) {
+            if ($orderItem->getProduct()->getCategoryId() == self::CATEGORY_ID && $orderItem->getQuantity() == self::QTY) {
                 $this->setDiscountAmount($orderItem->getUnitPrice());
                 return $this;
             }
