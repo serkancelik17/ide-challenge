@@ -59,10 +59,9 @@ php bin/console doctrine:fixtures:load
         "quantity": 2,
         "unitPrice": 40,
         "total": 80
-      },
-      ...
+      }
     ],
-    "total": 745
+    "total": 80
   }
 ]
 ```
