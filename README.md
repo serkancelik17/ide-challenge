@@ -43,7 +43,7 @@ php bin/console doctrine:fixtures:load
 
 ### Orders
 
-```http
+```code
   GET /orders
 ```
 
@@ -69,7 +69,7 @@ php bin/console doctrine:fixtures:load
 
 ### Order Create
 
-```http
+```code
   POST /orders
 ```
 #### Sample Body
@@ -97,7 +97,7 @@ php bin/console doctrine:fixtures:load
 
 ### Order Delete
 
-```http
+```code
   DELETE /order/{order}
 ```
 
