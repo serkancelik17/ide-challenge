@@ -10,11 +10,6 @@ use App\Entity\OrderItem;
  */
 class DiscountCategoryToCheapestXPercentGteYRule extends DiscountRuleAbstract implements DiscountRuleInterface
 {
-//    @TODO will be remove
-//    CONST CATEGORY_ID = 1;
-//    CONST QTY = 2; //GTE compare value
-//    CONST DISCOUNT = 0.20;
-
     private int $categoryId;
     private int $quantity;
     private float $discount;
@@ -33,18 +28,18 @@ class DiscountCategoryToCheapestXPercentGteYRule extends DiscountRuleAbstract im
         /** @var OrderItem[] $categoryItems */
         $categoryItems = [];
 
-        // butun itemlar icin don ve ilgili kategoridekileri bu
+        // if matched category
         foreach ($order->getItems() AS $item) {
             if ($item->getProduct()->getCategoryId() == $this->categoryId) {
                 $categoryItems[] = $item;
             }
         }
 
-        //Belirtilen kategoriden 2 veya daha fazla varsa
+        // get 2 for the category
         if ( count($categoryItems) >= $this->quantity) {
-            // Fiyata gore sirala
+            // order by price
             usort($categoryItems,function ($a,$b){return $a->getUnitPrice() > $b->getUnitPrice();});
-            //en ucuz urunu bul
+            // find cheapest product
             $this->setDiscountAmount($categoryItems[0]->getTotal() * $this->discount);
 
             return $this;

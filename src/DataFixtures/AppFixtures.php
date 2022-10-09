@@ -6,20 +6,21 @@ use App\Entity\Customer;
 use App\Entity\Order;
 use App\Entity\OrderItem;
 use App\Entity\Product;
-use App\Repository\CustomerRepository;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
+use Exception;
 use Faker\Factory;
+use Faker\Generator;
 
 class AppFixtures extends Fixture
 {
-    protected $faker;
+    protected Generator $faker;
     private ObjectManager $manager;
 
     private array $customers,$products = [];
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function load(ObjectManager $manager): void
     {
@@ -33,7 +34,7 @@ class AppFixtures extends Fixture
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function loadProducts() {
         //Add Products
@@ -57,7 +58,7 @@ class AppFixtures extends Fixture
         for ($i=0; $i<20; $i++) {
             $customer = new Customer();
             $customer->setName($this->faker->name)
-                ->setSince($this->faker->dateTimeBetween('-30 days','now'))
+                ->setSince($this->faker->dateTimeBetween('-30 days'))
                 ->setRevenue($this->faker->randomFloat(0,1000));
 
             $this->manager->persist($customer);
@@ -68,7 +69,7 @@ class AppFixtures extends Fixture
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function loadOrders()
     {

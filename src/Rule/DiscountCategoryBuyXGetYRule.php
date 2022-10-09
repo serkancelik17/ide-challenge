@@ -10,11 +10,6 @@ use App\Entity\OrderItem;
  */
 class DiscountCategoryBuyXGetYRule extends DiscountRuleAbstract implements DiscountRuleInterface
 {
-    /** @TOOO will be remove */
-//    const CATEGORY_ID = 2;
-//    const QTY = 6;
-//    const DISCOUNT_QTY = 1;
-
     private int $categoryId;
     private int $quantity;
     private int $discountQuantity;
@@ -34,7 +29,7 @@ class DiscountCategoryBuyXGetYRule extends DiscountRuleAbstract implements Disco
         /** @var OrderItem $orderItem */
         foreach ($order->getItems() as $orderItem) {
 
-            //Kategori ve Qty uyusuyorsa indirimi dondur.
+            //If matched category and qty
             if ($orderItem->getProduct()->getCategoryId() == $this->categoryId && $this->quantity == self::QTY) {
                 $this->setDiscountAmount($orderItem->getUnitPrice());
                 return $this;
