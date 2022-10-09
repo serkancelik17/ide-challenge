@@ -35,7 +35,7 @@ class DiscountCategoryToCheapestXPercentGteYRule extends DiscountRuleAbstract im
 
         // butun itemlar icin don ve ilgili kategoridekileri bu
         foreach ($order->getItems() AS $item) {
-            if ($item->getProduct()->getCategory() == $this->categoryId) {
+            if ($item->getProduct()->getCategoryId() == $this->categoryId) {
                 $categoryItems[] = $item;
             }
         }

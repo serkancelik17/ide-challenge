@@ -113,6 +113,7 @@ class OrderController extends AbstractFOSRestController
      */
     public function discounts(Order $order) : JsonResponse
     {
+
         $data = [];
         $totalDiscount = 0;
 
@@ -124,19 +125,21 @@ class OrderController extends AbstractFOSRestController
 
         $data['orderId'] = $order->getId();
         $subTotal = $order->getTotal();
-        //Kuralları uygulaa
+
+        //apply rules
         foreach ($rules AS $rule) {
-            $instance = (new $rule($order))->handle($order);
-            if($instance instanceof DiscountRuleInterface) {
-                $subTotal -= $instance->getDiscountAmount();
-                $totalDiscount += $instance->getDiscountAmount();
-                /** @var DiscountRuleAbstract $instance */
-                $instance->setSubTotal($subTotal);
-                $data['discounts'][] = ['discountReason' =>$instance->getDiscountReason(),'discountAmount'=>$instance->getDiscountAmount(),'subTotal'=>$instance->getSubTotal()];
-            }
-            $data['totalDiscount'] = $totalDiscount;
-            $data['discountedTotal'] = $order->getTotal() - $totalDiscount;
-        }
+            if($rule instanceof DiscountRuleInterface) {
+                //if rule is valid
+                if ($rule->handle($order)) {
+                    $subTotal -= $rule->getDiscountAmount();
+                    $totalDiscount += $rule->getDiscountAmount();
+                    $rule->setSubTotal($subTotal);
+                    $data['discounts'][] = ['discountReason' => $rule->getDiscountReason(), 'discountAmount' => $rule->getDiscountAmount(), 'subTotal' => $rule->getSubTotal()];
+                }
+                $data['totalDiscount'] = $totalDiscount;
+                $data['discountedTotal'] = $order->getTotal() - $totalDiscount;
+            } // <end> if
+        } // <end> foreach
 
         return new JsonResponse($data);
 
