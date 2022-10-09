@@ -23,7 +23,7 @@ class Order
     #[ORM\Column]
     private float $total;
 
-    #[ORM\OneToMany(mappedBy: 'order', targetEntity: OrderItem::class)]
+    #[ORM\OneToMany(mappedBy: 'order', targetEntity: OrderItem::class, cascade: ["persist"])]
     private Collection $items;
 
     public function __construct()

@@ -1,6 +1,8 @@
 <?php
 namespace  App\Type\Order;
 
+use App\Type\Order\Schema\ItemType;
+use JMS\Serializer\Annotation\Type;
 use Symfony\Component\Validator\Constraints as Assert;
 
 class NewRequestType
@@ -12,12 +14,13 @@ class NewRequestType
      */
     public int $customerId;
 
-//    /**
-//     * @var ItemType[]
-//     *
-//     * @Assert\Type("array")
-//     */
-//    public ItemType $items;
+    /**
+     * @Assert\Type("array")
+     * @Assert\Count(min=1)
+     * @Assert\NotBlank()
+     * @Type("array<App\Type\Order\Schema\ItemType>")
+     */
+    public array $items;
     /**
      * @Assert\Type("float")
      * @Assert\NotBlank()

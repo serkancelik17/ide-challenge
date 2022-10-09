@@ -77,11 +77,11 @@ class OrderController extends AbstractFOSRestController
      */
     public function store(ConstraintViolationListInterface $validationErrors, NewRequestType $newRequestType) : JsonResponse|View
     {
-        //request i validate et
+        // validate to request
         if (\count($validationErrors) > 0) {
             return View::create($validationErrors, Response::HTTP_BAD_REQUEST);
         }
-        // siparişi kaydet
+        // save order
         try {
             $orderId = $this->orderService->store($newRequestType);
         } catch (Exception $e) {
