@@ -1,5 +1,5 @@
 
-# Serkan Celik Ide - Challenge
+# Serkan Celik IDE - Challenge
 
 ## Installation
 
@@ -21,125 +21,113 @@ Run Docker Compose
   docker-compose up
 ```
 
-Sunucuyu **symfony** ile çalıştırın
+Create database
 
 ```bash
-  symfony serve
+  php bin/console doctrine:database:create
 ```
 
-**.env** dosyasından veritabanı ayarlarınızı yapın
-
-
-**Sql** sorgularını alın ve veritabanında sorguları çalıştırın
+Create database schema
 
 ```bash
-  php bin/console d:s:u --dump-sql
+php bin/console  doctrine:schema:create
 ```
 
-**Doctrine Fixtures**'i çalıştırın
+Create doctrine schema for Demo
 
 ```bash
-  php bin/console doctrine:fixtures:load
+php bin/console doctrine:fixtures:load
 ```
 
-## API Kullanımı
+# API Usage
 
-#### Sipariş Ekle
+### Orders
 
 ```http
-  POST /order/add
+  GET /orders
 ```
 
-| Parametre | Tip     | Açıklama                |
-| :-------- | :------- | :------------------------- |
-| `customer` | `integer` | Müşteri id |
-| `items` | `array` | Dizi olarak çoklu ürün alır |
-| `productId ` | `integer` | Ürün id |
-| `quantity ` | `integer` | Ürün miktarı |
-
-#### Örnek json
-```javascript
-{
-  "customer": 5,
-  "items": [
-          {
-              "productId": 1,
-              "quantity": 1
-          },
-          {
-              "productId": 2,
-              "quantity": 4
-          }
-      ]
-}
-```
-
-
-#### Sipariş Sil
-
-```http
-  GET /order/delete/${order}
-```
-
-| Parametre | Tip     | Açıklama                       |
-| :-------- | :------- | :-------------------------------- |
-| `order`      | `integer` | Sipariş id |
-
-#### Örnek Response
-```javascript
-{
-    "success": true,
-    "message": "ORDER_DELETED",
-    "response": {
-        "id": 1,
-        "createdAt": "2022-09-08 19:50"
-    }
-}
-```
-
-
-#### Sipariş Liste
-
-```http
-  GET /order/list/${order}
-```
-
-| Parametre | Tip     | Açıklama                       |
-| :-------- | :------- | :-------------------------------- |
-| `order`      | `integer` | Sipariş id |
-
-#### Örnek Response
-```javascript
-{
+#### Sample JSON
+```json
+[
+  {
     "id": 1,
-    "createdAt": "2022-09-08 20:09",
-    "customer": {
-        "id": 1,
-        "name": "Türker Jöntürk"
-    },
+    "customerId": 16,
     "items": [
-        {
-            "product": "Reko Mini Tamir Hassas Tornavida Seti 32'li",
-            "unitPrice": "49.50",
-            "quantity": 3,
-            "total": 148.5
-        },
-        {
-            "product": "Legrand Salbei Anahtar, Alüminyum",
-            "unitPrice": "22.80",
-            "quantity": 8,
-            "total": 182.4
-        }
+      {
+        "productId": 6,
+        "quantity": 2,
+        "unitPrice": 40,
+        "total": 80
+      },
+      ...
     ],
-    "totalPrice": "330.9",
-    "discountPrice": "258.6"
-}
+    "total": 745
+  }
+]
 ```
 
-## Kullanılan Teknolojiler
+### Order Create
 
-**Framework:** Symfony5
+```http
+  POST /orders
+```
+#### Sample Body
+```json
+    {
+        "customer_id": 361,
+        "items": [
+            {
+                "product_id": 161,
+                "quantity": 10,
+                "unit_price": "11.28",
+                "total": "112.80"
+            }
+        ],
+        "total": "112.80"
+    }
+```
+#### Sample Response
+```json
+  {
+  "status":true,
+  "message":"Created new order successfully with id 131"
+  }
+```
 
-**Genel Olarak Paketler:** symfony/validator, nelmio/api-doc-bundle, doctrine/orm
+### Order Delete
 
-  
+```http
+  DELETE /order/{order}
+```
+
+#### Sample JSON
+```json
+{
+"status":  true, 
+"message": "Deleted order successfully with id 1"
+}
+```
+# TESTING
+#### If you want create a test database and filled with textures (Optional)
+
+Create test database
+```bash
+  php bin/console doctrine:database:create --env=test
+```
+
+Create test database schema
+
+```bash
+php bin/console  doctrine:schema:create --env=test
+```
+
+Create test doctrine schema for Demo
+
+```bash
+php bin/console doctrine:fixtures:load --env=test
+```
+### Just run
+```bash
+vendor/bin/phpunit
+```

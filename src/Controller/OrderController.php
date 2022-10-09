@@ -92,7 +92,7 @@ class OrderController extends AbstractFOSRestController
     }
 
     /** Delete An Order
-     * @Route("/{order}", methods={"DELETE"})
+     * @Route("/orders/{order}", methods={"DELETE"})
      */
     public function delete(Order $order) : JsonResponse
     {
