@@ -3,9 +3,9 @@
 namespace App\Controller;
 
 use App\Entity\Order;
-use App\Rule\DiscountCategoryBuy5Get1RuleInterface;
-use App\Rule\DiscountCategoryToCheapest20PercentGte2RuleInterface;
-use App\Rule\DiscountPayment10PercentOver1000RuleInterface;
+use App\Rule\DiscountCategoryBuyXGetYRule;
+use App\Rule\DiscountCategoryToCheapestXPercentGteYRule;
+use App\Rule\DiscountPaymentXPercentOverYRuleInterface;
 use App\Rule\DiscountRuleAbstract;
 use App\Rule\DiscountRuleInterface;
 use App\Service\OrderService;
@@ -117,9 +117,9 @@ class OrderController extends AbstractFOSRestController
         $totalDiscount = 0;
 
         $rules = [
-            DiscountCategoryBuy5Get1RuleInterface::class,
-            DiscountCategoryToCheapest20PercentGte2RuleInterface::class,
-            DiscountPayment10PercentOver1000RuleInterface::class
+            new DiscountCategoryBuyXGetYRule(2,6,1), //2 ID'li kategoriye ait bir üründen 6 adet satın alındığında, bir tanesi ücretsiz olarak verilir.
+            new DiscountCategoryToCheapestXPercentGteYRule(1,2,0.2), //1 ID'li kategoriden iki veya daha fazla ürün satın alındığında, en ucuz ürüne %20 indirim yapılır.
+            new DiscountPaymentXPercentOverYRuleInterface(1000,0.1), //Toplam 1000TL ve üzerinde alışveriş yapan bir müşteri, siparişin tamamından %10 indirim kazanır.
         ];
 
         $data['orderId'] = $order->getId();
